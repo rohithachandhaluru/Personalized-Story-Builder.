@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madlibs Story</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin-left: 170px;
+            margin-right: 170px;
+            background: linear-gradient(#7aeadd, #b83bfb);
+            padding: 50px solid black; 
+            background-color: #f4f9f4; 
+            color: #333; 
+            border: 3px #333;
+        }
+        h1 {
+            color: #000000;
+            text-align: center;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        label { 
+            display: block; 
+            margin: 10px 0 5px; 
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        input[type="text"] { 
+            width: calc(100% - 22px); 
+            padding: 10px; 
+            border: 2px solid #499b4c; 
+            border-radius: 4px;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus {
+            border-color: #FFC107;
+            outline: none;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #000000;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #363a36;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fff;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+            white-space: pre-wrap;
+        }
+        .result p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Personalized Story Builder</h1>
+    <form id="madlibs-form">
+        <!-- Placeholder inputs will be injected here -->
+    </form><br><br>
+    <button onclick="generateStory()">Generate Story</button>
+    <div class="result" id="result"></div>
+
+    <script>
+        const storyTemplate = `                                                                                                         The Brave Friends
+
+In the <adverb> village of <village name>, three animals lived near the forest: a strong <Animal 1>, a clever <Animal 2>, and a wise <Animal 3>. They were friends with two villagers, <Person 1> and <Person 2>.
+
+One hot summer, the river that gave water to the village started to dry up. The villagers were worried because without water, their crops wouldn’t grow. <Person 1> and <Person 2> decided to find a new source of water. Their animal friends wanted to help.
+
+They walked deep into the forest and faced many problems. The ground was rough, and the sun was hot. The <Animal 2> found a tall tree and climbed it to look for water. “I see a river far away!” the <Animal 2> shouted.
+
+They were happy, but the river was blocked by fallen trees and big rocks. The <Animal 1> used his strength to clear the way, while the <Animal 3> flew ahead to make sure they were safe.
+
+After hours of hard work, they finally reached the river. They dug a small path for the water to flow back to <village name>. Slowly, the water returned to the village. The people cheered and thanked their brave friends.
+
+<Person 1> smiled and said, “We did it by working hard and never giving up!”
+
+Moral: When we work together and don’t give up, we can solve even the hardest problems.
+        `;
+
+        function extractWords(story) {
+            const words = new Set();
+            let start_of_word = -1;
+            const target_start = "<";
+            const target_end = ">";
+
+            for (let i = 0; i < story.length; i++) {
+                if (story[i] === target_start) {
+                    start_of_word = i;
+                }
+
+                if (story[i] === target_end && start_of_word !== -1) {
+                    const word = story.substring(start_of_word, i + 1);
+                    words.add(word);
+                    start_of_word = -1;
+                }
+            }
+            return Array.from(words);
+        }
+
+        function injectInputs(words) {
+            const form = document.getElementById('madlibs-form');
+            form.innerHTML = '';
+            words.forEach(word => {
+                const label = document.createElement('label');
+                label.textContent = `Enter a word for ${word}: `;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = word;
+                form.appendChild(label);
+                form.appendChild(input);
+            });
+        }
+
+        function generateStory() {
+            const words = extractWords(storyTemplate);
+            const answers = {};
+            let allFilled = true;
+
+            words.forEach(word => {
+                const input = document.getElementById(word);
+                answers[word] = input.value;
+                if (input.value.trim() === "") {
+                    alert(`Please enter a word for ${word}.`);
+                    allFilled = false;
+                }
+            });
+
+            if (!allFilled) return;
+
+            let updatedStory = storyTemplate;
+            words.forEach(word => {
+                const regex = new RegExp(word, 'g');
+                updatedStory = updatedStory.replace(regex, answers[word]);
+            });
+
+            document.getElementById('result').textContent = updatedStory;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const words = extractWords(storyTemplate);
+            injectInputs(words);
+        });
+    </script>
+</body>
+</html>
